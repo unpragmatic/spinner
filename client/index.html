@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <svg id="svg_node" viewBox="0 0 256 256" style="height: 100vh; width: 100vw" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="118,48 138,48 128,60" style="fill:#a22b2b"/>
+        <g id="svg_node_wheel">
+            <circle cx="128" cy="128" r="80" stroke="#000000" fill="none"/>
+        </g>
+    </svg>
+
+    <audio
+        id="audio_ticker"
+        autoplay=""
+        src="data:audio/mpeg;base64,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"
+    ></audio>
+
+    <button onclick="play()">Spin</button>
+
+    <script>
+        const svgNode = document.getElementById("svg_node");
+        const svgNodeWheel = document.getElementById("svg_node_wheel");
+
+        const radius = 80
+        const [circleMidpointX, circleMidpointY] = [128, 128];
+
+        const options = [
+            // "minecraft", "valheim", "factorio", "golf with friends", "valorant", "nerts", "not nerts"
+            "golf with friends", "valorant", "nerts", "dominion", "tetris"
+        ]
+
+        const linesToDraw = options.length
+        for (let i = 0; i < linesToDraw; i++) {
+            const lineSegment = document.createElementNS('http://www.w3.org/2000/svg','line');
+            lineSegment.setAttribute('x1', circleMidpointX);
+            lineSegment.setAttribute('y1', circleMidpointY);
+
+            const angleDelta = (2*Math.PI) / linesToDraw;
+            const angle = angleDelta * i;
+            const x2 = radius*Math.sin(angle);
+            const y2 = radius*Math.cos(angle);
+            lineSegment.setAttribute('x2', circleMidpointX + x2);
+            lineSegment.setAttribute('y2', circleMidpointY + y2);
+            lineSegment.setAttribute('stroke', "#000000");
+
+            svgNodeWheel.appendChild(lineSegment);
+
+            const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+
+            const x2Text = radius*Math.sin(angle+(angleDelta/2)) * 1.8;
+            const y2Text = radius*Math.cos(angle+(angleDelta/2)) * 1.8;
+            const xText = (circleMidpointX + circleMidpointX + x2Text) * (1/2);
+            const yText = (circleMidpointY + circleMidpointY + y2Text) * (1/2)
+            text.setAttribute('x', xText);
+            text.setAttribute('y', yText);
+            text.style.textAnchor = 'middle'
+            text.style.dominantBaseline = 'middle'
+            text.style.fontSize = 7
+            const textTransformRadians = angle+(angleDelta/2)
+            const textTrasnformDegrees = -((textTransformRadians/(2*Math.PI)) * 360) + 180;
+            text.setAttribute('transform-origin', `${xText} ${yText}`);
+            // text.setAttribute('transform', `rotate(${angle+(angleDelta/2)}rad)`);
+            text.setAttribute('transform', `rotate(${textTrasnformDegrees})`);
+            text.textContent = options[i];
+
+            svgNodeWheel.appendChild(text);
+        }
+
+        svgNodeWheel.style.transformOrigin = 'center';
+        svgNodeWheel.style.transform = 'rotate(0rad)';
+
+        let angularVelocity = 0;
+        const friction = 0.995;
+        let lastTimestamp = undefined;
+        function step(timestamp) {
+            if (lastTimestamp === undefined) { lastTimestamp = timestamp }
+            const dt = timestamp - lastTimestamp;
+
+            // console.log(dt);
+            const currentRadiansStr = /rotate\((\d+\.?\d*)rad\)/.exec(svgNodeWheel.style.transform)
+            const currentRadians = parseFloat(currentRadiansStr[1]);
+
+            const targetRadians = currentRadians + (angularVelocity * dt);
+
+            svgNodeWheel.style.transform = `rotate(${targetRadians}rad)`;
+            lastTimestamp = timestamp;
+
+            angularVelocity = (friction * angularVelocity)
+            // const audioNode = document.getElementById("audio_ticker");
+            // audioNode.over
+            // audioNode.play();
+            requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step)
+
+        function play() {
+            angularVelocity = (2*Math.PI / 500) * (((options.length * 3) * Math.random()));
+        }
+
+
+    </script>
+</body>
+</html>
