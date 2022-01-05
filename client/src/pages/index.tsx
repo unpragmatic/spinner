@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react"
+import Menu from "../components/Menu";
 import Spinner from "../components/Spinner"
 
 function HomePage() {
   // const [socket, setSocket] = useState(undefined);
   const [rads, setRads] = useState(0);
+  const [options, setOptions] = useState<string[]>(['tetris']);
   
   const socketRef = useRef<WebSocket>(undefined);
 
@@ -50,10 +52,13 @@ function HomePage() {
     return () => cancelAnimationFrame(lastAnimationFrame.current);
   }, [])
 
-  const options = ['tetris'];
 
   return (
     <div>
+      <Menu
+        options={options}
+        onOptionsChange={setOptions}
+      />
       <Spinner
         rads={rads}
         options={options}
