@@ -32,8 +32,4 @@ function SyncedTextInput(props: DeltaTextInputProps) {
     </>)
 }
 
-SyncedTextInput.defaultProps = {
-    inputProps: {}
-}
-
 export default SyncedTextInput

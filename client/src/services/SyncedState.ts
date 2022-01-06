@@ -1,20 +1,17 @@
-import { useEffect, useRef } from "react";
+import { MutableRefObject, useEffect, useRef } from "react";
 import { StateWebsocketUrl } from "./StaticConstants";
 
 export interface State {
+  timestamp: number
   s: [number, number];
 }
 
-export const InitialState: State = {
-  s: [0, 0],
-};
-
-interface SyncedStateSetAngularVelocity {
+interface SyncedStateModifyRotation {
   type: "deltaTheta";
   deltaTheta: number;
 }
 
-interface SyncedStateModifyRotation {
+interface SyncedStateSetAngularVelocity {
   type: "dTheta";
   dTheta: number;
 }
@@ -22,18 +19,20 @@ interface SyncedStateModifyRotation {
 export type SyncedStateActions = SyncedStateSetAngularVelocity | SyncedStateModifyRotation;
 
 export interface SyncedState {
-  state: State,
+  stateRef: MutableRefObject<State>,
   setAngularVelocity: (angularVelocity: number) => void,
-  modifyRotation: (deltaRadians: number) => void
+  modifyRotation: (deltaRadians: number) => void,
+  getPredictedServerTimestamp: () => number
 }
 
 interface StatePayload {
-  options: string[],
+  timestamp: number
   s: [number, number]
 }
 
 export function useSyncedState(): SyncedState {
-  const stateRef = useRef<State>(InitialState);
+  const stateRef = useRef<State>(undefined);
+  const lastStateUpdateTimestampRef = useRef<DOMHighResTimeStamp>(undefined);
   const socketRef = useRef<WebSocket>(undefined);
 
   useEffect(() => {
@@ -44,8 +43,8 @@ export function useSyncedState(): SyncedState {
       stateRef.current = {
         ...payload,
       };
+      lastStateUpdateTimestampRef.current = performance.now();
     });
-
     return () => socket.close();
   }, []);
 
@@ -57,23 +56,33 @@ export function useSyncedState(): SyncedState {
 
   const modifyRotation = (deltaRadians: number) => {
     const msg: SyncedStateModifyRotation = {
-      type: 'dTheta',
-      dTheta: deltaRadians
+      type: 'deltaTheta',
+      deltaTheta: deltaRadians
     }
     socketSend(JSON.stringify(msg));
   }
 
   const setAngularVelocity = (angularVelocity: number) => {
     const msg: SyncedStateSetAngularVelocity = {
-      type: 'deltaTheta',
-      deltaTheta: angularVelocity
+      type: 'dTheta',
+      dTheta: angularVelocity
     }
     socketSend(JSON.stringify(msg));
   }
 
+  const getPredictedServerTimestamp = (): number => {
+    if (lastStateUpdateTimestampRef.current === undefined || stateRef.current.timestamp === undefined) {
+      return performance.now();
+    }
+
+    const millisecondsSinceUpdate = performance.now() - lastStateUpdateTimestampRef.current;
+    return stateRef.current.timestamp + millisecondsSinceUpdate;
+  }
+
   return {
-    state: stateRef.current,
+    stateRef: stateRef,
     setAngularVelocity,
-    modifyRotation
+    modifyRotation,
+    getPredictedServerTimestamp
   };
 }

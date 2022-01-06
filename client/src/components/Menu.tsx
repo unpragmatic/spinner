@@ -1,12 +1,13 @@
+import { SyncedText } from "@syncedstore/core";
 import { useState } from "react"
+import SyncedTextInput from "./SyncedTextInput";
 
 interface MenuProps {
-  options: string[]
-  onOptionsChange: (options: string[]) => void
+  options: SyncedText[]
 }
 
 function Menu(props: MenuProps) {
-  const { options, onOptionsChange } = props;
+  const { options } = props;
 
   const [visible, setVisible] = useState<boolean>(false);
   return (<>
@@ -39,24 +40,21 @@ function Menu(props: MenuProps) {
             <legend>Options</legend>
             {options.map((option, i) => {
               return (<div key={i}>
-                <input
-                  type='text'
-                  aria-label={`Option ${i}`}
-                  onChange={(e) => {
-                    const newOptions = [...options];
-                    newOptions[i] = e.target.value;
-                    onOptionsChange(newOptions);
+                <SyncedTextInput
+                  style={{
+                    backgroundColor: 'red'
                   }}
-                  value={option}
+                  syncedText={option}
+                />
+                <button
+                  onClick={() => options.splice(i, 1)}
                 >
-                </input>
-                <button>
                   Remove
                 </button>
               </div>)
             })}
             <button
-              onClick={() => onOptionsChange([...options, ''])}
+              onClick={() => options.push(new SyncedText(''))}
             >
               Add
             </button>

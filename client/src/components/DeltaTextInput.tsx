@@ -31,10 +31,10 @@ type DeltaTextInputProps = {
 function DeltaTextInput(props: DeltaTextInputProps) {
   const { value, onDelta } = props;
 
-  const inputProps = { ...props };
-  delete inputProps.value;
-  delete inputProps.onChange;
-  delete inputProps.onKeyDown;
+  const childProps = { ...props };
+  delete childProps.value; // We override
+  delete childProps.onDelta; // DeltaTextInput special prop
+  delete childProps.onKeyDown; // We override
 
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
     let handled = false;
@@ -77,16 +77,13 @@ function DeltaTextInput(props: DeltaTextInputProps) {
 
   return (<>
     <input
-      {...inputProps}
+      {...childProps}
       value={value}
+      onChange={() => {}}
       onKeyDown={onKeyDown}
     >
     </input>
   </>)
-}
-
-DeltaTextInput.defaultProps = {
-  inputProps: {}
 }
 
 export default DeltaTextInput

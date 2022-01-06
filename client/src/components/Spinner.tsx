@@ -1,4 +1,5 @@
 import { useRef } from "react"
+import { BackgroundColor, FontColor, LineColor, StrokeWidth } from "../style/Style";
 // import styles from './Spinner.module.css'
 
 interface SpinnerProps {
@@ -53,7 +54,8 @@ function Spinner(props: SpinnerProps) {
                 y1={circleY}
                 x2={x2}
                 y2={y2}
-                stroke="#000000"
+                stroke={LineColor}
+                strokeWidth={StrokeWidth}
             />
         )
     });
@@ -61,8 +63,9 @@ function Spinner(props: SpinnerProps) {
     const text = options.map((option, i) => {
         const angleDelta = (2 * Math.PI) / options.length;
         const angle = angleDelta * (i + 0.5);
-        const x = circleX + (circleRadius * Math.sin(angle) * 0.9);
-        const y = circleY + (circleRadius * Math.cos(angle) * 0.9);
+        const percentageDisplacement = 0.85;
+        const x = circleX + (circleRadius * Math.sin(angle) * percentageDisplacement);
+        const y = circleY + (circleRadius * Math.cos(angle) * percentageDisplacement);
 
         const textRotationDegrees = -((angle / (2 * Math.PI)) * 360) + 180;
 
@@ -75,6 +78,7 @@ function Spinner(props: SpinnerProps) {
                     textAnchor: 'middle',
                     dominantBaseline: 'middle',
                     fontSize: 7,
+                    fill: FontColor
                 }}
                 transform-origin={`${x} ${y}`}
                 transform={`rotate(${textRotationDegrees})`}
@@ -94,6 +98,7 @@ function Spinner(props: SpinnerProps) {
 
     const indicatorWidthInRadians = 2 * Math.PI * (1 / 100);
     const indicator = <path
+        fill="#42addb"
         d={`
             M ${radianToPointOnCircle(-(indicatorWidthInRadians / 2) + Math.PI).join(' ')}
             A ${circleRadius} ${circleRadius} 0 0 1 ${radianToPointOnCircle((indicatorWidthInRadians / 2) + Math.PI).join(' ')}
@@ -132,6 +137,9 @@ function Spinner(props: SpinnerProps) {
             viewBox={`0 0 ${svgWidth} ${svgHeight}`}
             xmlns="http://www.w3.org/2000/svg"
             ref={svgRef}
+            style={{
+                backgroundColor: BackgroundColor
+            }}
             onMouseDown={(e) => {
                 props.onDeltaThetaUpdate({
                     dt: 1,
@@ -192,9 +200,9 @@ function Spinner(props: SpinnerProps) {
             >
                 <circle
                     cx={circleX} cy={circleY} r={circleRadius}
-                    stroke="#000000"
-                    strokeWidth="0.5"
-                    fill="#ffffff"
+                    stroke={LineColor}
+                    strokeWidth={StrokeWidth}
+                    fill={BackgroundColor}
                 />
                 {lines}
                 {text}
