@@ -10,3 +10,16 @@ body {
     width: 100vw;
     height: 100vh;
 }
+
+fieldset {
+    margin-inline: 0;
+    padding-block: 0;
+    padding-inline: 0;
+    border: none;
+}
+
+input {
+    border: none;
+    background-color: none;
+    outline: none;
+}

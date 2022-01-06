@@ -1,5 +1,6 @@
 
 export const BackgroundColor = '#fdfdfd';
+export const ShadowColor = '#a6a6a6'
 export const LineColor = '#707070';
 export const FontColor = '#171716';
 

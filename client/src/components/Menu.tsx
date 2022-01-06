@@ -1,5 +1,6 @@
 import { SyncedText } from "@syncedstore/core";
 import { useState } from "react"
+import { BackgroundColor, LineColor, ShadowColor } from "../style/Style";
 import SyncedTextInput from "./SyncedTextInput";
 
 interface MenuProps {
@@ -16,7 +17,7 @@ function Menu(props: MenuProps) {
         position: 'fixed',
         right: 0,
         height: '100%',
-        width: 'min(30%, 32rem)',
+        width: 'min(70%, 24rem)',
         transform: visible ? 'none' : 'translateX(100%)',
         transition: '500ms ease-in-out'
       }}
@@ -25,39 +26,85 @@ function Menu(props: MenuProps) {
         style={{
           height: '100%',
           width: '100%',
-          backgroundColor: '#ff0000',
+          backgroundColor: BackgroundColor,
+          boxShadow: `0px 0px 5px 0px ${ShadowColor}`
         }}
       >
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            padding: '1rem 1rem 0 1rem',
+            padding: '4rem 1rem 0 1rem',
             rowGap: '0.2rem'
           }}
         >
-          <fieldset>
-            <legend>Options</legend>
-            {options.map((option, i) => {
-              return (<div key={i}>
-                <SyncedTextInput
-                  style={{
-                    backgroundColor: 'red'
-                  }}
-                  syncedText={option}
-                />
-                <button
-                  onClick={() => options.splice(i, 1)}
-                >
-                  Remove
-                </button>
-              </div>)
-            })}
-            <button
-              onClick={() => options.push(new SyncedText(''))}
+          <fieldset
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.4rem'
+            }}
+          >
+            <legend
+              style={{
+                paddingBottom: '0.8rem',
+                fontSize: 22
+              }}
             >
-              Add
-            </button>
+              Options
+            </legend>
+            {options.map((option, i) => {
+              return (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <SyncedTextInput
+                    style={{
+                      flex: '1 1 15rem',
+                      height: '1.5rem',
+                      borderBottom: `1px solid ${ShadowColor}`
+                    }}
+                    syncedText={option}
+                  />
+                  <button
+                    style={{
+                      flex: '0 0 2rem'
+                    }}
+                    onClick={() => options.splice(i, 1)}
+                  >
+                    -
+                  </button>
+                </div>
+              )
+            })}
+            <div
+              style={{
+                display: 'flex',
+                gap: '0.5rem',
+              }}
+            >
+              <input
+                style={{
+                  flex: '1 1 15rem',
+                  height: '1.5rem',
+                  borderBottom: `1px solid ${ShadowColor}`
+                }}
+                disabled={true}
+              >
+              </input>
+              <button
+                style={{
+                  flex: '0 0 2rem'
+                }}
+                onClick={() => options.push(new SyncedText(''))}
+              >
+                +
+              </button>
+            </div>
           </fieldset>
         </div>
       </div>

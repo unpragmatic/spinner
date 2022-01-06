@@ -26,15 +26,21 @@ function HomePage() {
   useAnimationLoop((dt: number) => {
     const serverState = serverStateRef.current ?? clientStateRef.current;
     const clientState = clientStateRef.current;
+    
+    // const absClientStates0 = Math.abs(clientState.s[0]);
+    // if (absClientStates0 > 2*Math.PI) {
+    //   clientState.s[0] -= (2*Math.PI * (clientState.s[0]/absClientStates0))
+    // }
 
     const t = clientState.timestamp - serverState.timestamp > 0 ? 1 : 0.95;
     const s1 = lerp(clientState.s[1], serverState.s[1], t) * (1 - (dt * friction));
     const s0 = lerp(clientState.s[0], serverState.s[0], t) + (s1 * dt);
+
     const newRenderState: State = {
       timestamp: getPredictedServerTimestamp(),
       s: [s0, s1]
     }
-    
+
     setRenderState(newRenderState);
     clientStateRef.current = newRenderState;
   })
