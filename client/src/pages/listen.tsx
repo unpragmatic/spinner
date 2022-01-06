@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import Menu from "../components/Menu";
 import Spinner from "../components/Spinner"
+import { useAnimationLoop } from "../utils/useAnimationLoop";
 
 interface State {
   timestamp: DOMHighResTimeStamp
@@ -37,18 +38,14 @@ function HomePage() {
     return () => socket.close();
   }, []);
 
-  const lastAnimationFrameHandle = useRef<number | undefined>(undefined);
-  const lastAnimationTimestamp = useRef<DOMHighResTimeStamp | undefined>();
-  const render = (timestamp) => {
-    if (lastAnimationTimestamp.current === undefined) {
-      lastAnimationTimestamp.current = timestamp;
-    }
-    const dt = timestamp - lastAnimationTimestamp.current;
+
+  useAnimationLoop((dt: number) => {
     setRenderState(renderState => {
       if (renderState !== undefined) {
         return {
+          ...renderState,
           timestamp: performance.now(),
-          options: stateRef.current.options,
+          options: renderState.timestamp < stateRef.current.timestamp ? renderState.options : stateRef.current.options,
           s: [
             (0.95 * renderState.s[0] + 0.05 * stateRef.current.s[0]) + renderState.s[1] * dt,
             (0.8 * renderState.s[1] + 0.2 * stateRef.current.s[1]) - (0.8 * renderState.s[1] + 0.2 * stateRef.current.s[1]) * dt * (1 / 1000)
@@ -56,16 +53,10 @@ function HomePage() {
         }
       }
     });
+  })
 
-    lastAnimationFrameHandle.current = requestAnimationFrame(render);
-    lastAnimationTimestamp.current = timestamp;
-  };
 
-  useEffect(() => {
-    lastAnimationFrameHandle.current = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(lastAnimationFrameHandle.current);
-  }, [])
-
+  // console.log(OptionsStoreHostname);
 
   return (
     <div style={{
@@ -76,8 +67,16 @@ function HomePage() {
         <Menu
           options={renderState.options}
           onOptionsChange={(options) => {
+            if (socketRef.current !== undefined && socketRef.current.readyState === WebSocket.OPEN) {
+              const msg = JSON.stringify({
+                type: 'options',
+                options: options
+              });
+              socketRef.current.send(msg);
+            }
             setRenderState(renderState => ({
               ...renderState,
+              timestamp: performance.now(),
               options
             }));
           }}
@@ -88,7 +87,7 @@ function HomePage() {
           options={renderState.options}
           rads={renderState.s[0]}
           onThetaUpdate={(delta) => {
-            setRenderState(renderState => ({ ...renderState, s: [renderState.s[0] + delta.rads, renderState.s[1]] }));
+            setRenderState(renderState => ({ ...renderState, timestamp: performance.now(), s: [renderState.s[0] + delta.rads, renderState.s[1]] }));
             if (socketRef.current !== undefined && socketRef.current.readyState === WebSocket.OPEN) {
               const msg = JSON.stringify({
                 type: 'deltaTheta',
@@ -99,7 +98,7 @@ function HomePage() {
 
           }}
           onDeltaThetaUpdate={(delta) => {
-            setRenderState(renderState => ({ ...renderState, s: [renderState.s[0], delta.deltaRads / delta.dt] }));
+            setRenderState(renderState => ({ ...renderState,  timestamp: performance.now(), s: [renderState.s[0], delta.deltaRads / delta.dt] }));
             if (socketRef.current !== undefined && socketRef.current.readyState === WebSocket.OPEN) {
               const payload = JSON.stringify({
                 type: 'dTheta',

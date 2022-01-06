@@ -35,7 +35,7 @@ interface DeltaDeltaTheta {
 function Spinner(props: SpinnerProps) {
     const { options, rads } = props;
     const [svgWidth, svgHeight] = [256, 256];
-    const [circleXPercentage, circleYPercentage] = [1/2, 0.5];
+    const [circleXPercentage, circleYPercentage] = [1 / 2, 0.5];
     const [circleX, circleY] = [svgWidth * circleXPercentage, svgHeight * circleYPercentage];
     const circleRadius = 80;
     const svgRef = useRef<SVGSVGElement>();
@@ -48,7 +48,7 @@ function Spinner(props: SpinnerProps) {
         const y2 = circleY + (circleRadius * Math.cos(angle));
         return (
             <line
-                key={option}
+                key={`${i}_${option}`}
                 x1={circleX}
                 y1={circleY}
                 x2={x2}
@@ -68,7 +68,7 @@ function Spinner(props: SpinnerProps) {
 
         return (
             <text
-                key={option}
+                key={`${i}_${option}`}
                 x={x}
                 y={y}
                 style={{
@@ -117,6 +117,7 @@ function Spinner(props: SpinnerProps) {
 
         if (isNaN(angle)) {
             console.log(`NAN: ${[m0, m1, dp, dp / (m0 * m1)]}`);
+            return 0;
         }
         const direction = (x0 * y1) - (x1 * y0);
 
@@ -186,7 +187,7 @@ function Spinner(props: SpinnerProps) {
             <g
                 style={{
                     transform: `rotate(${rads}rad)`,
-                    transformOrigin: `${circleXPercentage*100}% ${circleYPercentage*100}%`
+                    transformOrigin: `${circleXPercentage * 100}% ${circleYPercentage * 100}%`
                 }}
             >
                 <circle

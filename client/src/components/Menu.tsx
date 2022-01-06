@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 
 interface MenuProps {
   options: string[]
@@ -38,7 +38,7 @@ function Menu(props: MenuProps) {
           <fieldset>
             <legend>Options</legend>
             {options.map((option, i) => {
-              return (<>
+              return (<div key={i}>
                 <input
                   type='text'
                   aria-label={`Option ${i}`}
@@ -50,10 +50,16 @@ function Menu(props: MenuProps) {
                   value={option}
                 >
                 </input>
-                <button>Remove</button>
-              </>)
+                <button>
+                  Remove
+                </button>
+              </div>)
             })}
-            <button>Add</button>
+            <button
+              onClick={() => onOptionsChange([...options, ''])}
+            >
+              Add
+            </button>
           </fieldset>
         </div>
       </div>

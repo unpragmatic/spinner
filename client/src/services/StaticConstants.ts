@@ -1,0 +1,2 @@
+export const OptionsStoreServerUrl = process.env.NEXT_PUBLIC_OPTIONS_STORE_SERVER_URL;
+export const StateWebsocketUrl = process.env.NEXT_PUBLIC_STATE_WEBSOCKET_SERVER_URL;
