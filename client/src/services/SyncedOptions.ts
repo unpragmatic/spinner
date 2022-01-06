@@ -1,5 +1,4 @@
 import { syncedStore, getYjsValue, SyncedText } from "@syncedstore/core";
-import { MappedTypeDescription } from "@syncedstore/core/types/doc";
 import { useSyncedStore } from "@syncedstore/react";
 import { useEffect } from "react";
 import { WebsocketProvider } from "y-websocket";
