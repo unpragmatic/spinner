@@ -1,97 +1,89 @@
 import { useEffect, useRef, useState } from "react"
 import Menu from "../components/Menu";
 import Spinner from "../components/Spinner"
+import { useSyncedOptions } from "../services/SyncedOptions";
+import { State, useSyncedState } from "../services/SyncedState";
+import { lerp } from "../utils/math";
+import { useAnimationLoop } from "../utils/useAnimationLoop";
+
+
+interface StatePayload {
+  options: string[]
+  s: [number, number]
+}
+
+const createInitialState = (): State => ({ timestamp: performance.now(), s: [0, 0] })
 
 function HomePage() {
-  // const [socket, setSocket] = useState(undefined);
-  const [rads, setRads] = useState(0);
-  const [options, setOptions] = useState<string[]>(['tetris']);
-  
-  const socketRef = useRef<WebSocket>(undefined);
+  const options = useSyncedOptions();
+  const [renderState, setRenderState] = useState<State>(createInitialState);
+  const clientStateRef = useRef<State>(renderState);
 
-  useEffect(() => {
-    const socket = new WebSocket('ws://localhost:8080');
-    socketRef.current = socket;
-    socketRef.current.addEventListener('message', (event) => {
-      console.log(`Message from server: ${event.data}`);
-    });
+  const { stateRef: serverStateRef, setAngularVelocity, modifyRotation, getPredictedServerTimestamp } = useSyncedState();
 
-    return () => socket.close();
-  }, []);
+  const friction = 1 / 1000
+  useAnimationLoop((dt: number) => {
+    const serverState = serverStateRef.current ?? clientStateRef.current;
+    const clientState = clientStateRef.current;
+    
+    // const absClientStates0 = Math.abs(clientState.s[0]);
+    // if (absClientStates0 > 2*Math.PI) {
+    //   clientState.s[0] -= (2*Math.PI * (clientState.s[0]/absClientStates0))
+    // }
 
-  // useEffect(function() {
-  //   const interval = setInterval(function() {
-  //     setRads(2*Math.PI * Math.random());
-  //   }, 500)
+    const t = clientState.timestamp - serverState.timestamp >= 0 ? 1 : (window as any).terp;
+    const s1 = lerp(clientState.s[1], serverState.s[1], t) * (1 - (dt * friction));
+    const s0 = lerp(clientState.s[0], serverState.s[0], t) + (s1 * dt);
 
-  //   return () => clearInterval(interval);
-  // }, [])
-
-  const angularVelocityRef = useRef<number>(0);
-  const lastAnimationFrame = useRef<number | undefined>();
-  const lastAnimationTimestamp = useRef<DOMHighResTimeStamp | undefined>();
-  const step = (timestamp) => {
-    if (lastAnimationTimestamp.current === undefined) {
-      lastAnimationTimestamp.current = timestamp;
+    const newRenderState: State = {
+      timestamp: getPredictedServerTimestamp(),
+      s: [s0, s1]
     }
 
-    const delta = timestamp - lastAnimationTimestamp.current;
-    setRads(rads => 
-      rads + (angularVelocityRef.current * delta)
-    );
-
-    angularVelocityRef.current += (-angularVelocityRef.current * delta * (1/1000));
-
-    lastAnimationFrame.current = requestAnimationFrame(step);
-    lastAnimationTimestamp.current = timestamp;
-  };
+    setRenderState(newRenderState);
+    clientStateRef.current = {
+      ...newRenderState,
+      timestamp: clientStateRef.current.timestamp
+    };
+  })
 
   useEffect(() => {
-    lastAnimationFrame.current = requestAnimationFrame(step);
-
-    return () => cancelAnimationFrame(lastAnimationFrame.current);
+    if ((window as any).terp === undefined) {
+      (window as any).terp = 0.9;
+    }
   }, [])
 
+  const latency = 200;
 
   return (
-    <div>
-      <Menu
-        options={options}
-        onOptionsChange={setOptions}
-      />
-      <Spinner
-        rads={rads}
-        options={options}
-        onThetaUpdate={(delta) => {
-          console.log(delta);
-          
-          if (socketRef.current !== undefined && socketRef.current.readyState === WebSocket.OPEN) {
-            const msg = JSON.stringify({
-              type: 'deltaTheta',
-              deltaTheta: delta.rads
-            })
-            socketRef.current.send(msg);
-          }
-          setRads(rads => rads + delta.rads);
-        }}
-        onDeltaThetaUpdate={(delta) => {
-          angularVelocityRef.current = delta.deltaRads / delta.dt;
-          if (socketRef.current !== undefined && socketRef.current.readyState === WebSocket.OPEN) {
-            const payload = JSON.stringify({
-              type: 'dTheta',
-              dTheta: (delta.deltaRads / delta.dt)
-            })
-            socketRef.current.send(payload);
-          }
-        }}
-      />
-      <button
-        onClick={() => {
-          angularVelocityRef.current = (2*Math.PI / 500) * (((options.length * 3) * Math.random()));
-        }}
-      >
-        Spin
-      </button>
+    <div style={{
+      width: '100%',
+      height: '100%'
+    }}>
+      {renderState !== undefined &&
+        <Menu
+          options={options}
+        />
+      }
+      {renderState !== undefined &&
+        <Spinner
+          options={options.map(syncedText => syncedText.toString())}
+          rads={renderState.s[0]}
+          onThetaUpdate={(delta) => {
+            clientStateRef.current = {
+              timestamp: getPredictedServerTimestamp() + latency,
+              s: [clientStateRef.current.s[0] + delta.rads, clientStateRef.current.s[1]]
+            };
+            modifyRotation(delta.rads);
+          }}
+          onDeltaThetaUpdate={(delta) => {
+            clientStateRef.current = {
+              timestamp: getPredictedServerTimestamp() + latency,
+              s: [clientStateRef.current.s[0], delta.deltaRads / delta.dt]
+            };
+            setAngularVelocity(delta.deltaRads / delta.dt);
+          }}
+        />}
     </div>
   )
 }

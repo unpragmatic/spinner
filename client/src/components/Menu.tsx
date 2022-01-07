@@ -1,6 +1,6 @@
 import { SyncedText } from "@syncedstore/core";
 import { useState } from "react"
-import { BackgroundColor, LineColor, ShadowColor } from "../style/Style";
+import { BackgroundColor, LighterShadowColor, LineColor, ShadowColor } from "../style/Style";
 import SyncedTextInput from "./SyncedTextInput";
 
 interface MenuProps {
@@ -91,7 +91,9 @@ function Menu(props: MenuProps) {
                 style={{
                   flex: '1 1 15rem',
                   height: '1.5rem',
-                  borderBottom: `1px solid ${ShadowColor}`
+                  borderBottom: `1px solid ${ShadowColor}`,
+                  backgroundColor: LighterShadowColor,
+                  boxShadow: `0px 0px 5px 0px ${LighterShadowColor}`
                 }}
                 disabled={true}
               >
@@ -112,15 +114,16 @@ function Menu(props: MenuProps) {
     <button
       style={{
         position: 'fixed',
-        right: 0,
+        right: '1rem',
         top: '1rem',
+        height: '1.5rem'
       }}
       onClick={() => {
         console.log(visible);
         setVisible(!visible);
       }}
     >
-      {visible ? '>>' : '<<'}
+      {visible ? '<|' : '|>' }
     </button>
   </>)
 }

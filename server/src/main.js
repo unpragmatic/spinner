@@ -2,7 +2,7 @@ import { WebSocketServer } from 'ws';
 
 
 const state = {
-  options: ['tetris', 'valorant', 'nerts'],
+  timestamp: Number(process.hrtime.bigint() / 1000000n),
   s: [0, 0]
 }
 
@@ -17,6 +17,8 @@ function onMessage(data) {
     state.s[0] += payload.deltaTheta;
   } else if (payload.type === 'dTheta') {
     state.s[1] = payload.dTheta
+  } else if (payload.type === 'options') {
+    state.options = payload.options
   }
 
   console.log(state);
@@ -49,13 +51,22 @@ const interval2 = setInterval(() => {
   for (const client of wss.clients) {
     client.send(payload);
   }
-}, (1000 / 10));
+}, (1000 / 60));
 
 let lastTimestamp = process.hrtime.bigint();
 const simulation = setInterval(() => {
   const dt = (process.hrtime.bigint() - lastTimestamp) / 1000000n; // milliseconds
+  state.timestamp = Number(process.hrtime.bigint() / 1000000n)
   state.s[0] += state.s[1] * Number(dt);
-  state.s[1] += (-state.s[1] * Number(dt) * (1/1000));
+  state.s[1] += (-state.s[1] * Number(dt) * (1 / 1000));
+  if (Math.abs(state.s[1]) < 1e-5) {
+    state.s[1] = 0;
+  }
+
+  // const absRadians = Math.abs(state.s[0]);
+  // if (absRadians > 2*Math.PI) {
+  //   state.s[0] -= (2*Math.PI * (state.s[0]/absRadians))
+  // }
 
   lastTimestamp = process.hrtime.bigint();
 }, (1000 / 60));

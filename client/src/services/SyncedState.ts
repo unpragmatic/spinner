@@ -40,6 +40,7 @@ export function useSyncedState(): SyncedState {
     socketRef.current = socket;
     socketRef.current.addEventListener("message", (event) => {
       const payload = JSON.parse(event.data) as StatePayload;
+      
       stateRef.current = {
         ...payload,
       };
