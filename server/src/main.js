@@ -1,38 +1,89 @@
 import { WebSocketServer } from 'ws';
 
+// interface StatePayload {
+//   type: "state";
+//   timestamp: number;
+//   s: [number, number];
+// }
 
 const state = {
   timestamp: Number(process.hrtime.bigint() / 1000000n),
   s: [0, 0]
 }
 
+// interface LobbyPayload {
+//   type: "lobby";
+//   selfId: number;
+//   users: {
+//     id: number;
+//     name: string;
+//   }[];
+// }
+
+const lobby = {
+  users: {}
+}
+
 function heartbeat() {
   this.isAlive = true;
 }
 
-function onMessage(data) {
+function onMessage(ws, data) {
   const payload = JSON.parse(data);
   console.log(payload);
   if (payload.type === 'deltaTheta') {
     state.s[0] += payload.deltaTheta;
   } else if (payload.type === 'dTheta') {
-    state.s[1] = payload.dTheta
+    state.s[1] = payload.dTheta;
   } else if (payload.type === 'options') {
-    state.options = payload.options
+    state.options = payload.options;
+  } else if (payload.type === 'mouse') {
+    lobby.users[ws.userId].mousePosition = payload.mousePosition;
   }
 
-  console.log(state);
 }
 
-const wss = new WebSocketServer({ port: 8080 });
+if (process.env.PORT === undefined) {
+  throw "Missing PORT environment variable.";
+}
 
+const port = Number(process.env.PORT);
+console.log(`Starting state server on port ${port}`);
+const wss = new WebSocketServer({ port: port });
+
+let userId = 0;
 wss.on('connection', function connection(ws) {
-  ws.isAlive = true;
   console.log(`Connection: ${ws}`)
-  ws.on('message', onMessage);
+  ws.isAlive = true;
+  ws.userId = userId++;
+  lobby.users[ws.userId] = {
+    name: `Guest ${ws.userId}`,
+    mousePosition: [0, 0],
+    color: '#ff0000',
+  }
+
+
+  ws.on('message', (data) => onMessage(ws, data));
+
   ws.on('pong', heartbeat);
-  ws.on('close', () => console.log('Closed'));
+
+  ws.on('close', () => {
+    delete lobby.users[ws.userId];
+    console.log('Closed');
+  });
 });
+
+const lobbyDataInterval = setInterval(() => {
+  // console.log(`Sending lobby data.`);
+  for (const ws of wss.clients) {
+    // console.log(`Sending lobby data to ${ws.userId}`);
+    ws.send(JSON.stringify({
+      type: 'lobby',
+      selfId: ws.userId,
+      ...lobby,
+    }))
+  }
+}, (1000 / 30));
 
 const interval = setInterval(function ping() {
   wss.clients.forEach(function each(ws) {
@@ -47,7 +98,10 @@ const interval = setInterval(function ping() {
 }, 10000);
 
 const interval2 = setInterval(() => {
-  const payload = JSON.stringify(state);
+  const payload = JSON.stringify({
+    ...state,
+    type: 'state'
+  });
   for (const client of wss.clients) {
     client.send(payload);
   }
