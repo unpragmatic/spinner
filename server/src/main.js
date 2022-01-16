@@ -39,8 +39,9 @@ function onMessage(ws, data) {
     state.options = payload.options;
   } else if (payload.type === 'mouse') {
     lobby.users[ws.userId].mousePosition = payload.mousePosition;
+  } else if (payload.type === 'name') {
+    lobby.users[ws.userId].name = payload.name;
   }
-
 }
 
 if (process.env.PORT === undefined) {

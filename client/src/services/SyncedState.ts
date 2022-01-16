@@ -17,6 +17,11 @@ interface SyncedLobbySetMousePosition {
   mousePosition: [number, number];
 }
 
+interface SyncedLobbySetName {
+  type: 'name'
+  name: string
+}
+
 export type SyncedStateActions =
   | SyncedStateSetAngularVelocity
   | SyncedStateModifyRotation;
@@ -27,6 +32,7 @@ export interface SyncServerService {
   setAngularVelocity: (angularVelocity: number) => void;
   modifyRotation: (deltaRadians: number) => void;
   setMousePosition: (x: number, y: number) => void;
+  setName: (name: string) => void;
   getPredictedServerTimestamp: () => number;
 }
 
@@ -107,6 +113,14 @@ export function useSyncServer(): SyncServerService {
     socketSend(JSON.stringify(msg));
   };
 
+  const setName = (name: string) => {
+    const msg: SyncedLobbySetName = {
+      type: 'name',
+      name
+    };
+    socketSend(JSON.stringify(msg));
+  }
+
   const getPredictedServerTimestamp = (): number => {
     if (
       lastStateUpdateTimestampRef.current === undefined ||
@@ -126,6 +140,7 @@ export function useSyncServer(): SyncServerService {
     setAngularVelocity,
     modifyRotation,
     setMousePosition,
+    setName,
     getPredictedServerTimestamp,
   };
 }

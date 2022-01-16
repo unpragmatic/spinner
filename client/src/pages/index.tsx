@@ -9,6 +9,7 @@ import { useSyncServer } from "../services/SyncedState";
 import { useWindowVariable } from "../services/WindowVariables";
 import { lerp } from "../utils/math";
 import { useAnimationLoop } from "../utils/useAnimationLoop";
+import { useIntervalLoop } from "../utils/useIntervalLoop";
 
 
 
@@ -25,11 +26,25 @@ function HomePage() {
     setAngularVelocity,
     modifyRotation,
     getPredictedServerTimestamp,
-    setMousePosition
+    setMousePosition,
+    setName
   } = useSyncServer();
 
-  const friction = 1 / 1000
+  const [username, setUsername] = useState<string | undefined>(undefined);
 
+  // Potential race condition craziness. Maybe time to pull in rxjs...
+  useIntervalLoop(() => {
+    if (lobbyRef.current !== undefined && username === undefined) {
+      const selfId = lobbyRef.current.selfId;
+      const selfUser = lobbyRef.current.users[selfId];
+      setUsername(selfUser.name);
+      return true;
+    }
+
+    return false;
+  }, 1000)
+
+  const friction = 1 / 1000
   useAnimationLoop((dt: number) => {
     const serverState = serverCircleStateRef.current ?? clientCircleStateRef.current;
     const clientState = clientCircleStateRef.current;
@@ -86,29 +101,34 @@ function HomePage() {
           setMousePosition(...mousePosition);
         }}
       >
-      <Menu
-        options={options}
-      />
-      <Spinner
-        options={options.map(syncedText => syncedText.toString())}
-        rads={renderState.s[0]}
-        onThetaUpdate={(delta) => {
-          clientCircleStateRef.current = {
-            timestamp: getPredictedServerTimestamp() + latency,
-            s: [clientCircleStateRef.current.s[0] + delta.rads, clientCircleStateRef.current.s[1]]
-          };
-          modifyRotation(delta.rads);
-        }}
-        onDeltaThetaUpdate={(delta) => {
-          clientCircleStateRef.current = {
-            timestamp: getPredictedServerTimestamp() + latency,
-            s: [clientCircleStateRef.current.s[0], delta.deltaRads / delta.dt]
-          };
-          setAngularVelocity(delta.deltaRads / delta.dt);
-        }}
-      />
+        <Menu
+          options={options}
+          onNameChange={(name) => {
+            setUsername(name);
+            setName(name);
+          }}
+          name={username}
+        />
+        <Spinner
+          options={options.map(syncedText => syncedText.toString())}
+          rads={renderState.s[0]}
+          onThetaUpdate={(delta) => {
+            clientCircleStateRef.current = {
+              timestamp: getPredictedServerTimestamp() + latency,
+              s: [clientCircleStateRef.current.s[0] + delta.rads, clientCircleStateRef.current.s[1]]
+            };
+            modifyRotation(delta.rads);
+          }}
+          onDeltaThetaUpdate={(delta) => {
+            clientCircleStateRef.current = {
+              timestamp: getPredictedServerTimestamp() + latency,
+              s: [clientCircleStateRef.current.s[0], delta.deltaRads / delta.dt]
+            };
+            setAngularVelocity(delta.deltaRads / delta.dt);
+          }}
+        />
 
-    </MouseOverlay>
+      </MouseOverlay>
     </div >
   )
 }

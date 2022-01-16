@@ -24,6 +24,10 @@ input {
     outline: none;
 }
 
+input:disabled {
+    background-color: #f2f2f2;
+}
+
 /* button {
     padding: 0;
     border: 0;

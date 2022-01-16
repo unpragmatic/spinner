@@ -5,6 +5,8 @@ import SyncedTextInput from "./SyncedTextInput";
 
 interface MenuProps {
   options: SyncedText[]
+  name: string | undefined
+  onNameChange: (name: string) => void
 }
 
 function Menu(props: MenuProps) {
@@ -27,7 +29,8 @@ function Menu(props: MenuProps) {
           height: '100%',
           width: '100%',
           backgroundColor: BackgroundColor,
-          boxShadow: `0px 0px 5px 0px ${ShadowColor}`
+          boxShadow: `0px 0px 5px 0px ${ShadowColor}`,
+          overflowY: 'auto',
         }}
       >
         <div
@@ -35,13 +38,14 @@ function Menu(props: MenuProps) {
             display: 'flex',
             flexDirection: 'column',
             padding: '4rem 1rem 0 1rem',
-            rowGap: '0.2rem'
+            rowGap: '4rem'
           }}
         >
           <fieldset
             style={{
               display: 'flex',
               flexDirection: 'column',
+              flexBasis: '30rem',
               gap: '0.4rem'
             }}
           >
@@ -108,6 +112,36 @@ function Menu(props: MenuProps) {
               </button>
             </div>
           </fieldset>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.4rem'
+            }}
+          >
+            <label
+              htmlFor="name"
+              style={{
+                paddingBottom: '0.8rem',
+                fontSize: 22,
+                display: 'block'
+              }}
+            >
+              Name
+            </label>
+            <input
+              style={{
+                height: '1.5rem',
+                borderBottom: `1px solid ${ShadowColor}`
+
+              }}
+              onChange={(e) => props.onNameChange(e.target.value)}
+              value={props.name ?? ''}
+              disabled={props.name === undefined}
+            >
+            </input>
+          </div>
         </div>
       </div>
     </div>
@@ -119,11 +153,10 @@ function Menu(props: MenuProps) {
         height: '1.5rem'
       }}
       onClick={() => {
-        console.log(visible);
         setVisible(!visible);
       }}
     >
-      {visible ? '<|' : '|>' }
+      {visible ? '<|' : '|>'}
     </button>
   </>)
 }

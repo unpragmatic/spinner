@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 export function useIntervalLoop(
-  callback: (dt: number, timestamp: number) => void,
+  callback: (dt: number, timestamp: number) => boolean | void,
   ms: number,
 ) {
   const lastIntervalTimestamp = useRef<DOMHighResTimeStamp | undefined>();
@@ -17,7 +17,10 @@ export function useIntervalLoop(
       const timestamp = performance.now();
       const dt = timestamp - lastIntervalTimestamp.current;
 
-      callback(dt, timestamp);
+      const shouldClearInterval = callback(dt, timestamp);
+      if (shouldClearInterval) {
+        clearInterval(setIntervalHandle)
+      }
 
       lastIntervalTimestamp.current = timestamp;
     }, ms);
