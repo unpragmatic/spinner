@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  frontend:
+    image: spinner-frontend:latest
+    ports:
+      - "8100"
+
+  backend-state:
+    image: spinner-state-backend:latest
+    ports: 
+      - "8101"
+
+  backend-options:
+    image: spinner-options-backend:latest
+    ports:
+      - "8102"
